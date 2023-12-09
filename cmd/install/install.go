@@ -2,12 +2,11 @@ package install
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
-
-	"github.com/hashicorp/go-multierror"
 )
 
 type installer interface {
@@ -21,7 +20,7 @@ type installer interface {
 func Install(cmd string) error {
 	is := installers()
 	if len(is) == 0 {
-		return errors.New("Did not find any shells to install")
+		return errors.New("did not find any shells to install")
 	}
 	bin, err := getBinaryPath()
 	if err != nil {
@@ -31,7 +30,7 @@ func Install(cmd string) error {
 	for _, i := range is {
 		errI := i.Install(cmd, bin)
 		if errI != nil {
-			err = multierror.Append(err, errI)
+			err = fmt.Errorf("%w: %w", err, errI)
 		}
 	}
 
@@ -61,7 +60,7 @@ func IsInstalled(cmd string) bool {
 func Uninstall(cmd string) error {
 	is := installers()
 	if len(is) == 0 {
-		return errors.New("Did not find any shells to uninstall")
+		return errors.New("did not find any shells to uninstall")
 	}
 	bin, err := getBinaryPath()
 	if err != nil {
@@ -71,7 +70,7 @@ func Uninstall(cmd string) error {
 	for _, i := range is {
 		errI := i.Uninstall(cmd, bin)
 		if errI != nil {
-			err = multierror.Append(err, errI)
+			err = fmt.Errorf("%w: %w", err, errI)
 		}
 	}
 
